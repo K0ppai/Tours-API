@@ -21,4 +21,22 @@ const deleteUser = (req, res) => {
   res.json({ message: `Delete user${id}` });
 };
 
-export { getAllUsers, postUser, patchUser, deleteUser, getUser };
+const checkId = (req, res, next, val) => {
+  if (val > 20) {
+    return res.json({
+      message: 'Invalid ID',
+    });
+  }
+  next();
+};
+
+const checkBody = (req, res, next) => {
+  if (!req.body.name && !req.body.price) {
+    return res.status(400).json({
+      message: 'Invalid request body',
+    });
+  }
+  next();
+};
+
+export { getAllUsers, postUser, patchUser, deleteUser, getUser, checkId, checkBody };

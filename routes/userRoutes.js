@@ -1,5 +1,7 @@
 import express from 'express';
 import {
+  checkBody,
+  checkId,
   deleteUser,
   getAllUsers,
   getUser,
@@ -9,7 +11,9 @@ import {
 
 const router = express.Router();
 
-router.route('/').get(getAllUsers).post(postUser);
+router.param('id', checkId);
+
+router.route('/').get(getAllUsers).post(checkBody, postUser);
 
 router.route('/:id').get(getUser).patch(patchUser).delete(deleteUser);
 
