@@ -1,5 +1,7 @@
+import Tour from '../models/tourModel.js';
+
 const getAllTours = (req, res) => {
-  res.json({ message: 'Get tour', requestTime: req.requestTime });
+  res.json({ message: 'Get tour' });
 };
 
 const getTour = (req, res) => {
@@ -7,8 +9,17 @@ const getTour = (req, res) => {
   res.json({ message: `Get tour${id}` });
 };
 
-const postTour = (req, res) => {
-  res.json({ message: 'Post tour' });
+const postTour = async (req, res) => {
+  try {
+    const tour = await Tour.create(req.body);
+
+    res.status(201).json({
+      status: 'success',
+      data: tour,
+    });
+  } catch (error) {
+    res.status(400).json({ status: 'fail', message: error });
+  }
 };
 
 const patchTour = (req, res) => {

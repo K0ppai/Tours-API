@@ -11,6 +11,7 @@ import {
 
 const router = express.Router();
 
+// param middleware
 router.param('id', checkId);
 
 router.route('/').get(getAllUsers).post(checkBody, postUser);
