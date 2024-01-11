@@ -2,16 +2,41 @@ import Tour from '../models/tourModel';
 import { Request, Response } from 'express';
 
 const getAllTours = async (req: Request, res: Response) => {
-  const query = { ...req.query };
-  const excludedFields = ['page', 'sort', 'limit', 'fields'];
-  excludedFields.forEach((field) => delete query[field]);
+  // Destructuing the query to mutate
+  const queryObj = { ...req.query };
 
-  let queryStr: string = JSON.stringify(query);
-  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match: string) => `$${match}`);
+  // Exclude the fields that are not in the model
+  const excludedFields = ['page', 'sort', 'limit', 'fields'];
+  excludedFields.forEach((field) => delete queryObj[field]);
+
+  // Convert the query to string and replace the operators
+  let queryStr: string = JSON.stringify(queryObj);
+  queryStr = queryStr.replace(
+    /\b(gte|gt|lte|lt)\b/g,
+    (match: string) => `$${match}`
+  );
+
+  let query = Tour.find(JSON.parse(queryStr));
+  
+  // Sorting
+  if (req.query.sort) {
+    const sortBy = (req.query.sort as string).split(',').join(' ');
+    query = query.sort(sortBy);
+  } else {
+    query = query.sort('-createdAt');
+  }
+
+  // Field limiting
+  if (req.query.fields) {
+    const fileds = (req.query.fields as string).split(',').join(' ');
+    query = query.select(fileds);
+  } else {
+    query = query.select('-__v');
+  }
 
   try {
-    const tours = await Tour.find(JSON.parse(queryStr));
-    
+    const tours = await query;
+
     res.status(200).json({
       status: 'success',
       results: tours.length,
