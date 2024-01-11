@@ -1,5 +1,13 @@
 import Tour from '../models/tourModel';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
+
+// middleware for top-5-cheap
+const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  req.query.limit = '5';
+  next();
+};
 
 const getAllTours = async (req: Request, res: Response) => {
   // Destructuing the query to mutate
@@ -38,9 +46,9 @@ const getAllTours = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 100;
   const skip = (page - 1) * limit;
-  
+
   query = query.skip(skip).limit(limit);
-  
+
   if (req.query.page) {
     const count = await Tour.countDocuments();
     if (skip >= count) throw new Error("This page doesn't exit");
@@ -128,4 +136,4 @@ const deleteTour = async (req: Request, res: Response) => {
   }
 };
 
-export { getAllTours, postTour, patchTour, deleteTour, getTour };
+export { getAllTours, postTour, patchTour, deleteTour, getTour, aliasTopTours };
