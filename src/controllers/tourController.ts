@@ -17,7 +17,7 @@ const getAllTours = async (req: Request, res: Response) => {
   );
 
   let query = Tour.find(JSON.parse(queryStr));
-  
+
   // Sorting
   if (req.query.sort) {
     const sortBy = (req.query.sort as string).split(',').join(' ');
@@ -32,6 +32,18 @@ const getAllTours = async (req: Request, res: Response) => {
     query = query.select(fileds);
   } else {
     query = query.select('-__v');
+  }
+
+  // Pagination
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 100;
+  const skip = (page - 1) * limit;
+  
+  query = query.skip(skip).limit(limit);
+  
+  if (req.query.page) {
+    const count = await Tour.countDocuments();
+    if (skip >= count) throw new Error("This page doesn't exit");
   }
 
   try {
