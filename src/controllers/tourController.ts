@@ -2,14 +2,22 @@ import Tour from '../models/tourModel';
 import { Request, Response } from 'express';
 
 const getAllTours = async (req: Request, res: Response) => {
+  const query = { ...req.query };
+  const excludedFields = ['page', 'sort', 'limit', 'fields'];
+  excludedFields.forEach((field) => delete query[field]);
+
+  let queryStr: string = JSON.stringify(query);
+  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match: string) => `$${match}`);
+
   try {
-    const tours = await Tour.find();
+    const tours = await Tour.find(JSON.parse(queryStr));
+    
     res.status(200).json({
       status: 'success',
+      results: tours.length,
       data: {
         tours,
       },
-      results: tours.length,
     });
   } catch (error) {
     res.status(400).json({
