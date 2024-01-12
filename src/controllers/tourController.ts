@@ -1,9 +1,9 @@
 import Tour from '../models/tourModel';
 import { NextFunction, Request, Response } from 'express';
-import APIFeatures from 'utils/apiFeatures';
+import APIFeatures from '../utils/apiFeatures';
 
 // middleware for top-5-cheap
-const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
+const aliasTopTours = (req: Request, _res: Response, next: NextFunction) => {
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   req.query.limit = '5';
@@ -99,4 +99,42 @@ const deleteTour = async (req: Request, res: Response) => {
   }
 };
 
-export { getAllTours, postTour, patchTour, deleteTour, getTour, aliasTopTours };
+const getTourStats = async (_req: Request, res: Response) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          _id: { $toUpper: '$difficulty' },
+          numTours: { $sum: 1 },
+          numRatings: { $avg: '$ratingsQuantity' },
+          avgRatings: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+      {
+        $sort: {
+          avgPrice: -1,
+        },
+      },
+    ]);
+
+    res.status(200).json(stats);
+  } catch (error) {
+    res.status(400).json({ status: 'fail', message: error });
+  }
+};
+
+export {
+  getAllTours,
+  postTour,
+  patchTour,
+  deleteTour,
+  getTour,
+  aliasTopTours,
+  getTourStats,
+};
