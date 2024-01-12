@@ -1,4 +1,6 @@
-export interface TourType {
+import { Document } from 'mongoose';
+
+export interface TourType extends Document {
   name: string;
   duration: number;
   maxGroupSize: number;

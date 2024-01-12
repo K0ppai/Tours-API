@@ -1,61 +1,24 @@
 import Tour from '../models/tourModel';
 import { NextFunction, Request, Response } from 'express';
+import APIFeatures from 'utils/apiFeatures';
 
 // middleware for top-5-cheap
 const aliasTopTours = (req: Request, res: Response, next: NextFunction) => {
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   req.query.limit = '5';
+  req.query.page = '1';
   next();
 };
 
 const getAllTours = async (req: Request, res: Response) => {
-  // Destructuing the query to mutate
-  const queryObj = { ...req.query };
-
-  // Exclude the fields that are not in the model
-  const excludedFields = ['page', 'sort', 'limit', 'fields'];
-  excludedFields.forEach((field) => delete queryObj[field]);
-
-  // Convert the query to string and replace the operators
-  let queryStr: string = JSON.stringify(queryObj);
-  queryStr = queryStr.replace(
-    /\b(gte|gt|lte|lt)\b/g,
-    (match: string) => `$${match}`
-  );
-
-  let query = Tour.find(JSON.parse(queryStr));
-
-  // Sorting
-  if (req.query.sort) {
-    const sortBy = (req.query.sort as string).split(',').join(' ');
-    query = query.sort(sortBy);
-  } else {
-    query = query.sort('-createdAt');
-  }
-
-  // Field limiting
-  if (req.query.fields) {
-    const fileds = (req.query.fields as string).split(',').join(' ');
-    query = query.select(fileds);
-  } else {
-    query = query.select('-__v');
-  }
-
-  // Pagination
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 100;
-  const skip = (page - 1) * limit;
-
-  query = query.skip(skip).limit(limit);
-
-  if (req.query.page) {
-    const count = await Tour.countDocuments();
-    if (skip >= count) throw new Error("This page doesn't exit");
-  }
-
   try {
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
     res.status(200).json({
       status: 'success',
