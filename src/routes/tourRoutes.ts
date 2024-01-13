@@ -7,9 +7,12 @@ import {
   postTour,
   aliasTopTours,
   getTourStats,
+  getMonthlyPlan,
 } from '../controllers/tourController';
 
 const router = express.Router();
+
+router.route('/monthly-plan/:year').get(getMonthlyPlan);
 
 router.route('/tour-stats').get(getTourStats);
 
