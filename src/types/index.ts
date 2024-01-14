@@ -1,6 +1,6 @@
-import { Document } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
-export interface TourType extends Document {
+export interface TTour {
   name: string;
   duration: number;
   maxGroupSize: number;
@@ -10,9 +10,15 @@ export interface TourType extends Document {
   ratingsQuantity: number;
   summary: string;
   imageCover: string;
-  images: string[];
+  images: Types.Array<string>;
   createdAt: Date;
-  startDates: string[];
+  startDates: Types.Array<string>;
   priceDiscount?: number;
   description?: string;
+  secretTour: Boolean;
+  slug: string;
+}
+
+export interface TourModelType extends Model<TTour> {
+  startTime: number;
 }

@@ -1,7 +1,9 @@
-import mongoose from 'mongoose';
+import { NextFunction } from 'express';
+import { model, Schema } from 'mongoose';
 import slugify from 'slugify';
+import { TTour, TourModelType } from 'types';
 
-const tourSchema = new mongoose.Schema(
+const tourSchema = new Schema<TTour, TourModelType, {}>(
   {
     name: {
       type: String,
@@ -54,6 +56,7 @@ const tourSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    secretTour: { type: Boolean, default: false },
   },
   {
     toJSON: { virtuals: true },
@@ -67,7 +70,7 @@ tourSchema.virtual('durationInWeek').get(function () {
 });
 
 //  Middleware before the save()/create() event
-tourSchema.pre('save', function (next) {
+tourSchema.pre('save', function (next: NextFunction) {
   console.log('Document about to be saved');
   this.slug = slugify(this.name, {
     lower: true,
@@ -76,12 +79,31 @@ tourSchema.pre('save', function (next) {
 });
 
 //  Middleware after the save()/create() event
-tourSchema.post('save', function (doc, next) {
+tourSchema.post('save', function (doc, next: NextFunction) {
   console.log('Document Saved');
   console.log(doc);
   next();
 });
 
-const Tour = mongoose.model('Tour', tourSchema);
+// QUERY MIDDLEWARE
+tourSchema.pre(/^find/, function (this: TourModelType, next: NextFunction) {
+  this.find({
+    secretTour: {
+      $ne: true,
+    },
+  });
+  this.startTime = Date.now();
+  next();
+});
+
+tourSchema.post(
+  /^find/,
+  function (this: TourModelType, _doc, next: NextFunction): void {
+    console.log(`Query took ${Date.now() - this.startTime}`);
+    next();
+  }
+);
+
+const Tour = model<TTour>('Tour', tourSchema);
 
 export default Tour;
