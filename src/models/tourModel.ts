@@ -104,6 +104,19 @@ tourSchema.post(
   }
 );
 
+// Aggregation Middleware
+tourSchema.pre('aggregate', function (next: NextFunction) {
+  this.pipeline().unshift({
+    $match: {
+      secretTour: {
+        $ne: true,
+      },
+    },
+  });
+  
+  next();
+});
+
 const Tour = model<TTour>('Tour', tourSchema);
 
 export default Tour;
