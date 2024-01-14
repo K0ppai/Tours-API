@@ -72,6 +72,7 @@ const patchTour = async (req: Request, res: Response) => {
   try {
     const tour = await Tour.findByIdAndUpdate(id, req.body, {
       new: true,
+      // run validators(ie. maxLength) again
       runValidators: true,
     });
 

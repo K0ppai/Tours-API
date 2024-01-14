@@ -9,6 +9,14 @@ const tourSchema = new Schema<TTour, TourModelType, {}>(
       type: String,
       required: [true, 'A tour must have a name'],
       unique: true,
+      maxlength: [
+        40,
+        'A tour name must have less than or equal to 40 characters',
+      ],
+      minlength: [
+        10,
+        'A tour name must have greater than or equal to 10 characters',
+      ],
     },
     slug: String,
     duration: {
@@ -22,6 +30,10 @@ const tourSchema = new Schema<TTour, TourModelType, {}>(
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty'],
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: 'Difficulty must be either: easy, medium or difficult',
+      },
     },
     price: {
       type: Number,
@@ -30,12 +42,22 @@ const tourSchema = new Schema<TTour, TourModelType, {}>(
     ratingsAverage: {
       type: Number,
       default: 4.5,
+      min: [1, 'Rating must be above 1.0'],
+      max: [5, 'Rating must be below 5.0'],
     },
     ratingsQuantity: {
       type: Number,
       default: 0,
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (val: number) {
+          return val < this.price;
+        },
+        message: 'Discount value ({VALUE}) must be lower than the price',
+      },
+    },
     summary: {
       type: String,
       trum: true,
@@ -78,7 +100,7 @@ tourSchema.pre('save', function (next: NextFunction) {
   next();
 });
 
-//  Middleware after the save()/create() event
+//  Middleware only works for the save()/create() events
 tourSchema.post('save', function (doc, next: NextFunction) {
   console.log('Document Saved');
   console.log(doc);
@@ -113,7 +135,7 @@ tourSchema.pre('aggregate', function (next: NextFunction) {
       },
     },
   });
-  
+
   next();
 });
 
