@@ -2,13 +2,14 @@ import express, { Express, Response, Request, NextFunction } from 'express';
 import morgan from 'morgan';
 import userRouter from './routes/userRoutes';
 import tourRouter from './routes/tourRoutes';
-import { fileURLToPath } from 'url';
+import { pathToFileURL } from 'node:url';
 import { dirname } from 'path';
 import dotenv from 'dotenv';
+import { TErrorHandler } from 'types/errorHandlerTypes';
 dotenv.config({ path: './config.env' });
 
 const app: Express = express();
-// const __filename = fileURLToPath(import.meta.url);
+// const __filename = pathToFileURL(import.meta.filename);
 // const __dirname = dirname(__filename);
 
 if (process.env.NODE_ENV === 'development') {
@@ -27,11 +28,26 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tours', tourRouter);
 
 // Error handler for undefined routes
-app.all('*', (req: Request, res: Response) => {
-  res.json({
-    status: 'fail',
-    message: `Request route ${req.originalUrl} not found on this server`,
-  });
+app.all('*', (req: Request, _res: Response, next: NextFunction) => {
+  const err: TErrorHandler = new Error(
+    `Request route ${req.originalUrl} not found on this server`
+  );
+
+  err.statusCode = 404;
+  err.status = 'fail';
+  next(err);
 });
+
+app.use(
+  (err: TErrorHandler, _req: Request, res: Response, _next: NextFunction) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+
+    res.status(err.statusCode).json({
+      status: err.statusCode,
+      message: err.message,
+    });
+  }
+);
 
 export default app;
