@@ -1,4 +1,4 @@
-import express, {Express, Response, Request, NextFunction} from 'express';
+import express, { Express, Response, Request, NextFunction } from 'express';
 import morgan from 'morgan';
 import userRouter from './routes/userRoutes';
 import tourRouter from './routes/tourRoutes';
@@ -18,12 +18,20 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json());
 app.use(express.static(`${__dirname}/public`));
 
-// app.use((_req: Request, _res: Response, next: NextFunction) => {
-//   console.log('Hello from the middleware');
-//   next();
-// });
+app.use((_req: Request, _res: Response, next: NextFunction) => {
+  console.log('Hello from the middleware');
+  next();
+});
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tours', tourRouter);
+
+// Error handler for undefined routes
+app.all('*', (req: Request, res: Response) => {
+  res.json({
+    status: 'fail',
+    message: `Request route ${req.originalUrl} not found on this server`,
+  });
+});
 
 export default app;
