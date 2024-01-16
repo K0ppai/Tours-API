@@ -2,6 +2,7 @@ import Tour from '../models/tourModel';
 import { NextFunction, Request, Response } from 'express';
 import APIFeatures from '../utils/apiFeatures';
 import catchAsync from '../utils/catchAsync';
+import AppError from '../utils/appError';
 
 // middleware for top-5-cheap
 const aliasTopTours = (req: Request, _res: Response, next: NextFunction) => {
@@ -32,10 +33,14 @@ const getAllTours = catchAsync(
 );
 
 const getTour = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
     const tour = await Tour.findById(id);
+
+    if (!tour) {
+      return next(new AppError('There is no tour with this ID', 404));
+    }
 
     res.json({
       status: 'success',

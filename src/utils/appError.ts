@@ -1,7 +1,7 @@
 class AppError extends Error {
-  private status: string;
-  private statusCode: number;
-  private isOperational: boolean;
+  status: string;
+  statusCode: number;
+  isOperational: boolean;
 
   constructor(message: string, statusCode: number) {
     super(message);
@@ -9,8 +9,6 @@ class AppError extends Error {
     this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
     this.isOperational = true;
-
-    Error.captureStackTrace(this, this.constructor);
   }
 }
 
