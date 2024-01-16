@@ -1,8 +1,14 @@
-class APIFeatures {
-  query: any;
-  queryString: any;
+import { Query } from 'mongoose';
+import { TTour } from 'types';
+import { TReqQuery } from 'types/reqQueryType';
 
-  constructor(query: any, queryString: any) {
+type TQuery = Query<TTour[], TTour>;
+
+class APIFeatures {
+  query: TQuery;
+  private queryString: TReqQuery;
+
+  constructor(query: TQuery, queryString: TReqQuery) {
     this.query = query;
     this.queryString = queryString;
   }
