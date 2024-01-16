@@ -5,7 +5,8 @@ import tourRouter from './routes/tourRoutes';
 import { pathToFileURL } from 'node:url';
 import { dirname } from 'path';
 import dotenv from 'dotenv';
-import { TErrorHandler } from 'types/errorHandlerTypes';
+import AppError from './utils/appError';
+import globalErrorHandler from './controllers/errorController';
 dotenv.config({ path: './config.env' });
 
 const app: Express = express();
@@ -27,27 +28,17 @@ app.use((_req: Request, _res: Response, next: NextFunction) => {
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tours', tourRouter);
 
-// Error handler for undefined routes
+// Error handler middleware for undefined routes
 app.all('*', (req: Request, _res: Response, next: NextFunction) => {
-  const err: TErrorHandler = new Error(
-    `Request route ${req.originalUrl} not found on this server`
+  next(
+    new AppError(
+      `Request route ${req.originalUrl} not found on this server`,
+      404
+    )
   );
-
-  err.statusCode = 404;
-  err.status = 'fail';
-  next(err);
 });
 
-app.use(
-  (err: TErrorHandler, _req: Request, res: Response, _next: NextFunction) => {
-    err.statusCode = err.statusCode || 500;
-    err.status = err.status || 'error';
-
-    res.status(err.statusCode).json({
-      status: err.statusCode,
-      message: err.message,
-    });
-  }
-);
+// Global error handler
+app.use(globalErrorHandler);
 
 export default app;
