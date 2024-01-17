@@ -20,6 +20,12 @@ const handleDuplicateErrorDB = (err: TErrorHandler) => {
   return new AppError(message, 400);
 };
 
+const handleInvalidTokenError = () =>
+  new AppError('Invalid Token. Please log in again.', 401);
+
+const handleExpiredTokenError = () =>
+  new AppError('Expired Token. Please log in again.', 401);
+
 const sendErrorDev = (err: TErrorHandler, res: Response) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -61,8 +67,11 @@ const globalErrorHandler = (
     let error = Object.create(err);
 
     if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
+    if (error.name === 'ValidationError')
+      error = handleValidationErrorDB(error);
     if (error.code === 11000) error = handleDuplicateErrorDB(error);
+    if (error.name === 'JsonWebTokenError') error = handleInvalidTokenError();
+    if (error.name === 'TokenExpiredError') error = handleExpiredTokenError();
 
     sendErrorProd(error, res);
   }
