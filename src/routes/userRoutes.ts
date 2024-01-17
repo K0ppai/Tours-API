@@ -16,6 +16,7 @@ const router = express.Router();
 // router.param('id', checkId);
 
 router.post('/signup', signup);
+
 router.post('/login', login);
 
 router.route('/').get(getAllUsers).post(checkBody, postUser);
