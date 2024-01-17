@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import User from '../models/userModel';
+import catchAsync from '../utils/catchAsync';
 
 // middlewares
 const checkId = (
@@ -25,9 +26,19 @@ const checkBody = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-const getAllUsers = (req: Request, res: Response) => {
-  res.json({ message: 'Get user' });
-};
+const getAllUsers = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const users = await User.find();
+
+    res.status(200).json({
+      status: 'success',
+      results: users.length,
+      data: {
+        users,
+      },
+    });
+  }
+);
 
 const getUser = (req: Request, res: Response) => {
   const { id } = req.params;
