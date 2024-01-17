@@ -1,9 +1,28 @@
 import { NextFunction } from 'express';
-import { Schema, model } from 'mongoose';
+import { Model, Schema, model } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 
-const userSchema = new Schema({
+interface TUser {
+  name: string;
+  email: string;
+  photo: string;
+  password: string;
+  passwordConfirm: string;
+}
+
+type TCorrectPasswordFn = (
+  loginPassword: string,
+  userPassword: string
+) => Promise<boolean>;
+
+const userSchema = new Schema<
+  TUser,
+  Model<TUser>,
+  {
+    correctPassword: TCorrectPasswordFn;
+  }
+>({
   name: {
     type: String,
     require: [true, 'Please provide your username.'],
@@ -25,6 +44,7 @@ const userSchema = new Schema({
     type: String,
     require: [true, 'Please provide a password.'],
     min: [8, 'A password should have at least 8 characters.'],
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -40,12 +60,19 @@ const userSchema = new Schema({
 });
 
 userSchema.pre('save', async function (next: NextFunction) {
-  if (!this.isModified('password')) return next();
+  // if (!this.isModified('password')) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirm = undefined;
   next();
 });
+
+userSchema.methods.correctPassword = async function (
+  loginPassword: string,
+  userPassword: string
+): Promise<boolean> {
+  return await bcrypt.compare(loginPassword, userPassword);
+};
 
 const User = model('User', userSchema);
 
