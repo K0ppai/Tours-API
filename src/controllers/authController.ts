@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import User from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
-import jwt from 'jsonwebtoken';
+import jwt, { Jwt, JwtPayload } from 'jsonwebtoken';
 import AppError from '../utils/appError';
 import { Types } from 'mongoose';
 
@@ -18,6 +18,7 @@ const signup = catchAsync(
       email: req.body.email,
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
+      passwordChangedAt: req.body.passwordChangedAt,
     });
 
     const token = signToken(user._id);
@@ -54,4 +55,45 @@ const login = catchAsync(
   }
 );
 
-export { signup, login };
+const protect = catchAsync(
+  async (req: Request, _res: Response, next: NextFunction) => {
+    let token;
+
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      token = req.headers.authorization.split(' ')[1];
+      // check token
+      if (!token) {
+        return next(new AppError('Please log in to get accesss', 401));
+      }
+    }
+
+    // verify token
+    const { id, iat } = jwt.verify(
+      token,
+      process.env.JWT_SECRET_KEY
+    ) as JwtPayload;
+
+    // check if user with the id exists
+    const user = await User.findById(id);
+
+    if (!user) {
+      return next(
+        new AppError('User no longet exists. Please sign up again.', 401)
+      );
+    }
+
+    // if user changed password after authentication, authenticate again
+    if (user.changePasswordAfter(iat)) {
+      return next(
+        new AppError('User changed password! Please log in again', 401)
+      );
+    }
+
+    next();
+  }
+);
+
+export { signup, login, protect };
