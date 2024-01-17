@@ -8,11 +8,14 @@ import {
   patchUser,
   postUser,
 } from '../controllers/userController';
+import { signup } from '../controllers/authController';
 
 const router = express.Router();
 
 // param middleware
-router.param('id', checkId);
+// router.param('id', checkId);
+
+router.post('/signup', signup);
 
 router.route('/').get(getAllUsers).post(checkBody, postUser);
 

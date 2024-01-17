@@ -52,6 +52,7 @@ const tourSchema = new Schema<TTour, TourModelType, {}>(
     priceDiscount: {
       type: Number,
       validate: {
+        // only works on create or save
         validator: function (val: number) {
           return val < this.price;
         },
