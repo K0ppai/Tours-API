@@ -9,6 +9,7 @@ interface TUser {
   photo: string;
   password: string;
   passwordConfirm: string;
+  passwordChangedAt: Date;
 }
 
 type TCorrectPasswordFn = (
@@ -21,6 +22,7 @@ const userSchema = new Schema<
   Model<TUser>,
   {
     correctPassword: TCorrectPasswordFn;
+    changePasswordAfter: (JWTTimeStamp: number) => boolean;
   }
 >({
   name: {
@@ -43,7 +45,7 @@ const userSchema = new Schema<
   password: {
     type: String,
     require: [true, 'Please provide a password.'],
-    min: [8, 'A password should have at least 8 characters.'],
+    minlength: [8, 'A password should have at least 8 characters.'],
     select: false,
   },
   passwordConfirm: {
@@ -57,10 +59,13 @@ const userSchema = new Schema<
       message: 'Passwords are not the same.',
     },
   },
+  passwordChangedAt: {
+    type: Date,
+  },
 });
 
 userSchema.pre('save', async function (next: NextFunction) {
-  // if (!this.isModified('password')) return next();
+  if (!this.isModified('password')) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirm = undefined;
@@ -72,6 +77,13 @@ userSchema.methods.correctPassword = async function (
   userPassword: string
 ): Promise<boolean> {
   return await bcrypt.compare(loginPassword, userPassword);
+};
+
+userSchema.methods.changePasswordAfter = function (JWTTimeStamp: number) {
+  // get time turn date into milliseconds because JWTTimeStamp is in seconds
+  const passwordChangeTime = this.passwordChangedAt.getTime() / 1000;
+  
+  return JWTTimeStamp < passwordChangeTime;
 };
 
 const User = model('User', userSchema);

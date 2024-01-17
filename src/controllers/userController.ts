@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import User from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
+import bcrypt from 'bcrypt';
 
 // middlewares
 const checkId = (
@@ -49,15 +50,23 @@ const postUser = (req: Request, res: Response) => {
   res.json({ message: 'Post User' });
 };
 
-const patchUser = async (req: Request, res: Response) => {
+const patchUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
+  let { password } = req.body;
+
+  if (password) {
+    password = await bcrypt.hash(password, 12);
+    req.body.password = password;
+  }
+
   const user = await User.findByIdAndUpdate(id, req.body, {
     new: true,
     // run validators(ie. maxLength) again
     runValidators: true,
   });
+
   res.json({ message: `Patch user${id}`, user });
-};
+});
 
 const deleteUser = (req: Request, res: Response) => {
   const { id } = req.params;
