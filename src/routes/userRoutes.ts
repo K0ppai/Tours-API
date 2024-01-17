@@ -8,7 +8,7 @@ import {
   patchUser,
   postUser,
 } from '../controllers/userController';
-import { signup } from '../controllers/authController';
+import { login, signup } from '../controllers/authController';
 
 const router = express.Router();
 
@@ -16,6 +16,7 @@ const router = express.Router();
 // router.param('id', checkId);
 
 router.post('/signup', signup);
+router.post('/login', login);
 
 router.route('/').get(getAllUsers).post(checkBody, postUser);
 
