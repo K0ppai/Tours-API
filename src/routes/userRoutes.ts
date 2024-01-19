@@ -16,8 +16,10 @@ const router = express.Router();
 // router.param('id', checkId);
 
 router.post('/signup', signup);
+
 router.post('/forgotPassword', forgotPassword);
-router.post('/resetPassword', resetPassword);
+
+router.patch('/resetPassword/:token', resetPassword);
 
 router.post('/login', login);
 
