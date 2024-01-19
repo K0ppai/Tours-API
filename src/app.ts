@@ -7,7 +7,7 @@ import { dirname } from 'path';
 import dotenv from 'dotenv';
 import AppError from './utils/appError';
 import globalErrorHandler from './controllers/errorController';
-dotenv.config({ path: './.env' });
+dotenv.config({ path: '.env' });
 
 const app: Express = express();
 // const __filename = pathToFileURL(import.meta.filename);

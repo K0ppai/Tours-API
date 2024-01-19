@@ -1,9 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import User from '../models/userModel';
+import User, { TUser } from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
-import jwt, { Jwt, JwtPayload } from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import AppError from '../utils/appError';
 import { Types } from 'mongoose';
+import { sendEmail } from '../utils/email';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
 
 const signToken = (id: Types.ObjectId) => {
   return jwt.sign({ id }, process.env.JWT_SECRET_KEY, {
@@ -19,6 +22,7 @@ const signup = catchAsync(
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
       passwordChangedAt: req.body.passwordChangedAt,
+      role: req.body.role,
     });
 
     const token = signToken(user._id);
@@ -55,8 +59,12 @@ const login = catchAsync(
   }
 );
 
+interface TProtectRequest extends Request {
+  user: TUser;
+}
+
 const protect = catchAsync(
-  async (req: Request, _res: Response, next: NextFunction) => {
+  async (req: TProtectRequest, _res: Response, next: NextFunction) => {
     let token;
 
     if (
@@ -77,23 +85,89 @@ const protect = catchAsync(
     ) as JwtPayload;
 
     // check if user with the id exists
-    const user = await User.findById(id);
+    const currentUser = await User.findById(id);
 
-    if (!user) {
+    if (!currentUser) {
       return next(
         new AppError('User no longet exists. Please sign up again.', 401)
       );
     }
 
     // if user changed password after authentication, authenticate again
-    if (user.changePasswordAfter(iat)) {
+    if (currentUser.changePasswordAfter(iat)) {
       return next(
         new AppError('User changed password! Please log in again', 401)
       );
     }
 
+    req.user = currentUser;
     next();
   }
 );
 
-export { signup, login, protect };
+const restrictTo = (...roles: string[]) => {
+  return (req: TProtectRequest, _res: Response, next: NextFunction) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError(
+          "Sorry, you don't have permission to perform this action.",
+          403
+        )
+      );
+    }
+
+    next();
+  };
+};
+
+const forgotPassword = catchAsync(
+  async (req: TProtectRequest, res: Response, next: NextFunction) => {
+    // 1) find user by email
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return next(new AppError("User with this email doesn't exist", 404));
+    }
+
+    // 2) create reset token for the user
+    const resetToken = user.createResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+
+    // 3) send token to email
+    const resetURL = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/users/resetPassword/${resetToken}`;
+    const message = `Forgot password? Click the following link to reset. \n${resetURL}`;
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'This link expires in 10 min',
+        message,
+      });
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Token sent to email!',
+      });
+    } catch (error) {
+      user.passwordResetExpiredAt = undefined;
+      user.passwordResetToken = undefined;
+
+      await user.save({ validateBeforeSave: false });
+
+      next(
+        new AppError(
+          'There was an error sending the email. Please try again.',
+          500
+        )
+      );
+    }
+  }
+);
+const resetPassword = (
+  req: TProtectRequest,
+  _res: Response,
+  next: NextFunction
+) => {};
+
+export { signup, login, protect, restrictTo, forgotPassword, resetPassword };
