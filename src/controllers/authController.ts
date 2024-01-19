@@ -5,6 +5,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import AppError from '../utils/appError';
 import { Types } from 'mongoose';
 import { sendEmail } from '../utils/email';
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
@@ -164,10 +165,39 @@ const forgotPassword = catchAsync(
     }
   }
 );
-const resetPassword = (
-  req: TProtectRequest,
-  _res: Response,
-  next: NextFunction
-) => {};
+
+const resetPassword = catchAsync(
+  async (req: TProtectRequest, res: Response, next: NextFunction) => {
+    // find user
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex');
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpiredAt: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return next(new AppError('Token is invalid or expired', 498));
+    }
+    
+    // if user exists change pw
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpiredAt = undefined;
+    await user.save();
+
+    // create token
+    const token = signToken(user._id);
+
+    res.status(200).json({
+      status: 'success',
+      token,
+    });
+  }
+);
 
 export { signup, login, protect, restrictTo, forgotPassword, resetPassword };
