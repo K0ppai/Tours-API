@@ -78,7 +78,9 @@ const userSchema = new Schema<
   passwordResetExpiredAt: Date,
 });
 
+// MIDDLEWARE
 userSchema.pre('save', async function (next: NextFunction) {
+  // only run on save event where password is modified, ie doesn't run on save event where name or other paths is changed
   if (!this.isModified('password')) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
@@ -86,6 +88,15 @@ userSchema.pre('save', async function (next: NextFunction) {
   next();
 });
 
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  // -1000 in case passwordChangedAt might be later than the created token which will be used to compare in authentication changePasswordAfter
+  this.passwordChangedAt = new Date(Date.now() - 1000);
+  next();
+});
+
+// INSTANCE METHODS
 userSchema.methods.correctPassword = async function (
   loginPassword: string,
   userPassword: string
@@ -112,7 +123,7 @@ userSchema.methods.createResetPasswordToken = function (this: TUser) {
     .digest('hex');
   // date in millisec + 10 * 1000(to change into sec) * 60(change into min)
   this.passwordResetExpiredAt = new Date(Date.now() + 10 * 1000 * 60);
-  
+
   return resetToken;
 };
 
