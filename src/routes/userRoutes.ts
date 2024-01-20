@@ -7,6 +7,7 @@ import {
   getUser,
   patchUser,
   postUser,
+  updateMe,
 } from '../controllers/userController';
 import {
   forgotPassword,
@@ -30,10 +31,12 @@ router.patch('/resetPassword/:token', resetPassword);
 
 router.patch('/updatePassword', protect, updatePassword);
 
+router.patch('/updateMe', protect, updateMe);
+
 router.post('/login', login);
 
 router.route('/').get(getAllUsers).post(checkBody, postUser);
 
-router.route('/:id').get(getUser).patch(patchUser).delete(deleteUser);
+router.route('/:id').get(getUser).patch(protect, patchUser).delete(deleteUser);
 
 export default router;
