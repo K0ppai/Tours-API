@@ -15,6 +15,16 @@ const signToken = (id: Types.ObjectId) => {
   });
 };
 
+const createSendToken = (user: TUser, res: Response, statusCode: number) => {
+  const token = signToken(user._id);
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: user,
+  });
+};
+
 const signup = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await User.create({
@@ -26,13 +36,7 @@ const signup = catchAsync(
       role: req.body.role,
     });
 
-    const token = signToken(user._id);
-
-    res.status(201).json({
-      status: 'success',
-      token,
-      data: user,
-    });
+    createSendToken(user, res, 201);
   }
 );
 
@@ -51,12 +55,7 @@ const login = catchAsync(
       return next(new AppError('Incorrect email or password', 401));
     }
 
-    const token = signToken(user._id);
-
-    res.status(200).json({
-      status: 'success',
-      token,
-    });
+    createSendToken(user, res, 200);
   }
 );
 
@@ -67,6 +66,10 @@ interface TProtectRequest extends Request {
 const protect = catchAsync(
   async (req: TProtectRequest, _res: Response, next: NextFunction) => {
     let token;
+
+    if (!req.headers.authorization) {
+      return next(new AppError('Please log in to get accesss', 401));
+    }
 
     if (
       req.headers.authorization &&
@@ -182,7 +185,7 @@ const resetPassword = catchAsync(
     if (!user) {
       return next(new AppError('Token is invalid or expired', 498));
     }
-    
+
     // if user exists change pw
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
@@ -191,13 +194,34 @@ const resetPassword = catchAsync(
     await user.save();
 
     // create token
-    const token = signToken(user._id);
-
-    res.status(200).json({
-      status: 'success',
-      token,
-    });
+    createSendToken(user, res, 200);
   }
 );
 
-export { signup, login, protect, restrictTo, forgotPassword, resetPassword };
+const updatePassword = catchAsync(
+  async (req: TProtectRequest, res: Response, next: NextFunction) => {
+    // 1) check if the user exists and the pw is correct
+    const user = await User.findById(req.user.id).select('+password');
+
+    if (!user.correctPassword(req.body.currentPassword, user.password)) {
+      return next(new AppError('Oops! Wrong password.', 404));
+    }
+
+    // 2) If pw correct, use save event to update so that middlewares will run
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    await user.save();
+
+    createSendToken(user, res, 200);
+  }
+);
+
+export {
+  signup,
+  login,
+  protect,
+  restrictTo,
+  forgotPassword,
+  resetPassword,
+  updatePassword,
+};
