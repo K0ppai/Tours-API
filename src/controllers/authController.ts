@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import User, { TUser } from '../models/userModel';
+import User from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import AppError from '../utils/appError';
@@ -7,6 +7,7 @@ import { Types } from 'mongoose';
 import { sendEmail } from '../utils/email';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import { TProtectRequest, TUser } from 'types';
 dotenv.config({ path: '.env' });
 
 const signToken = (id: Types.ObjectId) => {
@@ -58,10 +59,6 @@ const login = catchAsync(
     createSendToken(user, res, 200);
   }
 );
-
-interface TProtectRequest extends Request {
-  user: TUser;
-}
 
 const protect = catchAsync(
   async (req: TProtectRequest, _res: Response, next: NextFunction) => {

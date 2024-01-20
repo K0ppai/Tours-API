@@ -3,20 +3,9 @@ import { Model, Schema, Types, model } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { TUser } from 'types';
 
-export interface TUser {
-  name: string;
-  email: string;
-  role: string;
-  photo: string;
-  password: string;
-  passwordConfirm: string;
-  passwordChangedAt: Date;
-  passwordResetExpiredAt: Date;
-  passwordResetToken: string;
-  _id: Types.ObjectId;
-  id: Types.ObjectId;
-}
+
 
 type TCorrectPasswordFn = (
   loginPassword: string,

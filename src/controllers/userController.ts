@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import User from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
 import bcrypt from 'bcrypt';
+import { TProtectRequest } from 'types';
+import AppError from 'utils/appError';
 
 // middlewares
 const checkId = (
@@ -36,6 +38,27 @@ const getAllUsers = catchAsync(
       results: users.length,
       data: {
         users,
+      },
+    });
+  }
+);
+
+const updateMe = catchAsync(
+  async (req: TProtectRequest, res: Response, _next: NextFunction) => {
+    const updateFields = {
+      name: req.body.name,
+      email: req.body.email,
+    };
+
+    const user = await User.findByIdAndUpdate(req.user.id, updateFields, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user,
       },
     });
   }
@@ -81,4 +104,5 @@ export {
   getUser,
   checkId,
   checkBody,
+  updateMe,
 };

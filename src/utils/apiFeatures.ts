@@ -1,6 +1,6 @@
 import { Query } from 'mongoose';
 import { TTour } from 'types';
-import { TReqQuery } from 'types/reqQueryType';
+import { TReqQuery } from 'types';
 
 type TQuery = Query<TTour[], TTour>;
 

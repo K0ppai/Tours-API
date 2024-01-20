@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { TErrorHandler } from 'types/errorHandlerType';
+import { TErrorHandler } from 'types';
 import AppError from '../utils/appError';
 
 const handleCastErrorDB = (err: TErrorHandler) => {
