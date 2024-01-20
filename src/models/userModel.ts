@@ -1,5 +1,5 @@
 import { NextFunction } from 'express';
-import { Model, Schema, model } from 'mongoose';
+import { Model, Schema, Types, model } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -14,6 +14,8 @@ export interface TUser {
   passwordChangedAt: Date;
   passwordResetExpiredAt: Date;
   passwordResetToken: string;
+  _id: Types.ObjectId;
+  id: Types.ObjectId;
 }
 
 type TCorrectPasswordFn = (

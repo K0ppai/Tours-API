@@ -8,7 +8,14 @@ import {
   patchUser,
   postUser,
 } from '../controllers/userController';
-import { forgotPassword, login, resetPassword, signup } from '../controllers/authController';
+import {
+  forgotPassword,
+  login,
+  protect,
+  resetPassword,
+  signup,
+  updatePassword,
+} from '../controllers/authController';
 
 const router = express.Router();
 
@@ -20,6 +27,8 @@ router.post('/signup', signup);
 router.post('/forgotPassword', forgotPassword);
 
 router.patch('/resetPassword/:token', resetPassword);
+
+router.patch('/updatePassword', protect, updatePassword);
 
 router.post('/login', login);
 
