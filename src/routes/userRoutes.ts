@@ -2,6 +2,7 @@ import express from 'express';
 import {
   checkBody,
   checkId,
+  deleteMe,
   deleteUser,
   getAllUsers,
   getUser,
@@ -32,6 +33,8 @@ router.patch('/resetPassword/:token', resetPassword);
 router.patch('/updatePassword', protect, updatePassword);
 
 router.patch('/updateMe', protect, updateMe);
+
+router.delete('/deleteMe', protect, deleteMe);
 
 router.post('/login', login);
 
