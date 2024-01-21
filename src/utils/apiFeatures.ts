@@ -1,14 +1,14 @@
 import { Query } from 'mongoose';
-import { TTour } from 'types';
-import { TReqQuery } from 'types';
+import { ITour } from 'types';
+import { IReqQuery } from 'types';
 
-type TQuery = Query<TTour[], TTour>;
+type TQuery = Query<ITour[], ITour>;
 
 class APIFeatures {
   query: TQuery;
-  private queryString: TReqQuery;
+  private queryString: IReqQuery;
 
-  constructor(query: TQuery, queryString: TReqQuery) {
+  constructor(query: TQuery, queryString: IReqQuery) {
     this.query = query;
     this.queryString = queryString;
   }

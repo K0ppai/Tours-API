@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { Model, Types } from 'mongoose';
 
-export interface TTour {
+export interface ITour {
   name: string;
   duration: number;
   maxGroupSize: number;
@@ -20,18 +20,18 @@ export interface TTour {
   slug: string;
 }
 
-export interface TourModelType extends Model<TTour> {
+export interface TourModelType extends Model<ITour> {
   startTime: number;
 }
 
-export interface TReqQuery {
+export interface IReqQuery {
   sort?: string;
   fields?: string;
   page?: string;
   limit?: string;
 }
 
-export interface TErrorHandler extends Error {
+export interface IErrorHandler extends Error {
   statusCode?: number;
   status?: string;
   isOperational: boolean;
@@ -42,7 +42,7 @@ export interface TErrorHandler extends Error {
   };
   errors: object;
 }
-export interface TUser {
+export interface IUser {
   name: string;
   email: string;
   role: string;
@@ -54,7 +54,18 @@ export interface TUser {
   passwordResetToken: string;
   _id: Types.ObjectId;
   id: Types.ObjectId;
+  active: boolean;
 }
-export interface TProtectRequest extends Request {
-  user: TUser;
+
+export interface IUserMethods {
+  correctPassword: (
+    loginPassword: string,
+    userPassword: string
+  ) => Promise<boolean>;
+  changePasswordAfter: (JWTTimeStamp: number) => boolean;
+  createResetPasswordToken: () => string;
+}
+
+export interface IProtectRequest extends Request {
+  user: IUser;
 }

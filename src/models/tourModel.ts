@@ -1,9 +1,9 @@
 import { NextFunction } from 'express';
-import { model, Schema } from 'mongoose';
+import { Model, model, Schema } from 'mongoose';
 import slugify from 'slugify';
-import { TTour, TourModelType } from 'types';
+import { ITour, TourModelType } from 'types';
 
-const tourSchema = new Schema<TTour, TourModelType, {}>(
+const tourSchema = new Schema<ITour, Model<ITour>, {}>(
   {
     name: {
       type: String,
@@ -140,6 +140,6 @@ tourSchema.pre('aggregate', function (next: NextFunction) {
   next();
 });
 
-const Tour = model<TTour>('Tour', tourSchema);
+const Tour = model<ITour>('Tour', tourSchema);
 
 export default Tour;

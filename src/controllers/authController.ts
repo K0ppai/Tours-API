@@ -7,7 +7,7 @@ import { Types } from 'mongoose';
 import { sendEmail } from '../utils/email';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import { TProtectRequest, TUser } from 'types';
+import { IProtectRequest, IUser } from 'types';
 dotenv.config({ path: '.env' });
 
 const signToken = (id: Types.ObjectId) => {
@@ -16,7 +16,7 @@ const signToken = (id: Types.ObjectId) => {
   });
 };
 
-const createSendToken = (user: TUser, res: Response, statusCode: number) => {
+const createSendToken = (user: IUser, res: Response, statusCode: number) => {
   const token = signToken(user._id);
 
   res.status(statusCode).json({
@@ -61,7 +61,7 @@ const login = catchAsync(
 );
 
 const protect = catchAsync(
-  async (req: TProtectRequest, _res: Response, next: NextFunction) => {
+  async (req: IProtectRequest, _res: Response, next: NextFunction) => {
     let token;
 
     if (!req.headers.authorization) {
@@ -107,7 +107,7 @@ const protect = catchAsync(
 );
 
 const restrictTo = (...roles: string[]) => {
-  return (req: TProtectRequest, _res: Response, next: NextFunction) => {
+  return (req: IProtectRequest, _res: Response, next: NextFunction) => {
     if (!roles.includes(req.user.role)) {
       return next(
         new AppError(
@@ -122,7 +122,7 @@ const restrictTo = (...roles: string[]) => {
 };
 
 const forgotPassword = catchAsync(
-  async (req: TProtectRequest, res: Response, next: NextFunction) => {
+  async (req: IProtectRequest, res: Response, next: NextFunction) => {
     // 1) find user by email
     const user = await User.findOne({ email: req.body.email });
 
@@ -167,7 +167,7 @@ const forgotPassword = catchAsync(
 );
 
 const resetPassword = catchAsync(
-  async (req: TProtectRequest, res: Response, next: NextFunction) => {
+  async (req: IProtectRequest, res: Response, next: NextFunction) => {
     // find user
     const hashedToken = crypto
       .createHash('sha256')
@@ -196,7 +196,7 @@ const resetPassword = catchAsync(
 );
 
 const updatePassword = catchAsync(
-  async (req: TProtectRequest, res: Response, next: NextFunction) => {
+  async (req: IProtectRequest, res: Response, next: NextFunction) => {
     // 1) check if the user exists and the pw is correct
     const user = await User.findById(req.user.id).select('+password');
 

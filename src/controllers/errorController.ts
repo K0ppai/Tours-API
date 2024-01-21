@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
-import { TErrorHandler } from 'types';
+import { IErrorHandler } from 'types';
 import AppError from '../utils/appError';
 
-const handleCastErrorDB = (err: TErrorHandler) => {
+const handleCastErrorDB = (err: IErrorHandler) => {
   const message = `Invalid ${err.path}: ${err.value} doesn't exist.`;
   return new AppError(message, 400);
 };
 
-const handleValidationErrorDB = (err: TErrorHandler) => {
+const handleValidationErrorDB = (err: IErrorHandler) => {
   const message = Object.values(err.errors)
     .map((err: { message: string }) => err.message)
     .join('. ');
@@ -15,7 +15,7 @@ const handleValidationErrorDB = (err: TErrorHandler) => {
   return new AppError(`${message}.`, 400);
 };
 
-const handleDuplicateErrorDB = (err: TErrorHandler) => {
+const handleDuplicateErrorDB = (err: IErrorHandler) => {
   const message = `Duplicate name value: ${err.keyValue.name}. Please use another one.`;
   return new AppError(message, 400);
 };
@@ -26,7 +26,7 @@ const handleInvalidTokenError = () =>
 const handleExpiredTokenError = () =>
   new AppError('Expired Token. Please log in again.', 401);
 
-const sendErrorDev = (err: TErrorHandler, res: Response) => {
+const sendErrorDev = (err: IErrorHandler, res: Response) => {
   res.status(err.statusCode).json({
     status: err.status,
     message: err.message,
@@ -35,7 +35,7 @@ const sendErrorDev = (err: TErrorHandler, res: Response) => {
   });
 };
 
-const sendErrorProd = (err: TErrorHandler, res: Response) => {
+const sendErrorProd = (err: IErrorHandler, res: Response) => {
   // Send only operational errors
   if (err.isOperational) {
     res.status(err.statusCode).json({
@@ -53,7 +53,7 @@ const sendErrorProd = (err: TErrorHandler, res: Response) => {
 };
 
 const globalErrorHandler = (
-  err: TErrorHandler,
+  err: IErrorHandler,
   _req: Request,
   res: Response,
   _next: NextFunction
