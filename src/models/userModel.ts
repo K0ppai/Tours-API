@@ -1,26 +1,11 @@
 import { NextFunction } from 'express';
-import { Model, Schema, Types, model } from 'mongoose';
+import { FlatRecord, Model, Query, Schema, Types, model } from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import { TUser } from 'types';
+import { IUserMethods, IUser } from 'types';
 
-
-
-type TCorrectPasswordFn = (
-  loginPassword: string,
-  userPassword: string
-) => Promise<boolean>;
-
-const userSchema = new Schema<
-  TUser,
-  Model<TUser>,
-  {
-    correctPassword: TCorrectPasswordFn;
-    changePasswordAfter: (JWTTimeStamp: number) => boolean;
-    createResetPasswordToken: () => string;
-  }
->({
+const userSchema = new Schema<IUser, Model<IUser>, IUserMethods>({
   name: {
     type: String,
     require: [true, 'Please provide your username.'],
@@ -67,6 +52,11 @@ const userSchema = new Schema<
   },
   passwordResetToken: String,
   passwordResetExpiredAt: Date,
+  active: {
+    type: Boolean,
+    default: false,
+    select: false,
+  },
 });
 
 // MIDDLEWARE
@@ -87,6 +77,16 @@ userSchema.pre('save', function (next) {
   next();
 });
 
+userSchema.pre(/^find/, async function (this: Model<IUser>, next) {
+  this.find({
+    active: {
+      $ne: false,
+    },
+  });
+
+  next();
+});
+
 // INSTANCE METHODS
 userSchema.methods.correctPassword = async function (
   loginPassword: string,
@@ -96,7 +96,7 @@ userSchema.methods.correctPassword = async function (
 };
 
 userSchema.methods.changePasswordAfter = function (
-  this: TUser,
+  this: IUser,
   JWTTimeStamp: number
 ) {
   // get time turn date into milliseconds because JWTTimeStamp is in seconds
@@ -105,7 +105,7 @@ userSchema.methods.changePasswordAfter = function (
   return JWTTimeStamp < passwordChangeTime;
 };
 
-userSchema.methods.createResetPasswordToken = function (this: TUser) {
+userSchema.methods.createResetPasswordToken = function (this: IUser) {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
   this.passwordResetToken = crypto

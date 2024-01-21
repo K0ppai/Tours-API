@@ -2,12 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 import User from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
 import bcrypt from 'bcrypt';
-import { TProtectRequest } from 'types';
-import AppError from 'utils/appError';
+import { IProtectRequest } from 'types';
 
 // middlewares
-const checkId = (
-  req: Request,
+export const checkId = (
+  _req: Request,
   res: Response,
   next: NextFunction,
   val: number
@@ -20,7 +19,7 @@ const checkId = (
   next();
 };
 
-const checkBody = (req: Request, res: Response, next: NextFunction) => {
+export const checkBody = (req: Request, res: Response, next: NextFunction) => {
   if (!req.body.name && !req.body.price) {
     return res.status(400).json({
       message: 'Invalid request body',
@@ -29,7 +28,7 @@ const checkBody = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-const getAllUsers = catchAsync(
+export const getAllUsers = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const users = await User.find();
 
@@ -43,8 +42,8 @@ const getAllUsers = catchAsync(
   }
 );
 
-const updateMe = catchAsync(
-  async (req: TProtectRequest, res: Response, _next: NextFunction) => {
+export const updateMe = catchAsync(
+  async (req: IProtectRequest, res: Response, _next: NextFunction) => {
     const updateFields = {
       name: req.body.name,
       email: req.body.email,
@@ -64,16 +63,27 @@ const updateMe = catchAsync(
   }
 );
 
-const getUser = (req: Request, res: Response) => {
+export const deleteMe = catchAsync(
+  async (req: IProtectRequest, res: Response, _next: NextFunction) => {
+    await User.findByIdAndUpdate(req.user.id, { active: false });
+
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  }
+);
+
+export const getUser = (req: Request, res: Response) => {
   const { id } = req.params;
   res.json({ message: `Get user${id}` });
 };
 
-const postUser = (req: Request, res: Response) => {
+export const postUser = (req: Request, res: Response) => {
   res.json({ message: 'Post User' });
 };
 
-const patchUser = catchAsync(async (req: Request, res: Response) => {
+export const patchUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   let { password } = req.body;
 
@@ -91,18 +101,7 @@ const patchUser = catchAsync(async (req: Request, res: Response) => {
   res.json({ message: `Patch user${id}`, user });
 });
 
-const deleteUser = (req: Request, res: Response) => {
+export const deleteUser = (req: Request, res: Response) => {
   const { id } = req.params;
   res.json({ message: `Delete user${id}` });
-};
-
-export {
-  getAllUsers,
-  postUser,
-  patchUser,
-  deleteUser,
-  getUser,
-  checkId,
-  checkBody,
-  updateMe,
 };
