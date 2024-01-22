@@ -54,7 +54,7 @@ const userSchema = new Schema<IUser, Model<IUser>, IUserMethods>({
   passwordResetExpiredAt: Date,
   active: {
     type: Boolean,
-    default: false,
+    default: true,
     select: false,
   },
 });

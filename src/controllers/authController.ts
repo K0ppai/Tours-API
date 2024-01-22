@@ -18,6 +18,21 @@ const signToken = (id: Types.ObjectId) => {
 
 const createSendToken = (user: IUser, res: Response, statusCode: number) => {
   const token = signToken(user._id);
+  const cookieOptions: { expires: Date; httpOnly: boolean; secure?: boolean } =
+    {
+      expires: new Date(
+        Date.now() +
+          parseInt(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true,
+    };
+
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  // Don't show password in json
+  user.password = undefined;
+
+  res.cookie('jwt', token, cookieOptions);
 
   res.status(statusCode).json({
     status: 'success',
@@ -106,6 +121,7 @@ const protect = catchAsync(
   }
 );
 
+// Authorization 
 const restrictTo = (...roles: string[]) => {
   return (req: IProtectRequest, _res: Response, next: NextFunction) => {
     if (!roles.includes(req.user.role)) {
