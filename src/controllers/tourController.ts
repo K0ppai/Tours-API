@@ -140,7 +140,7 @@ const getMonthlyPlan = catchAsync(
       {
         $group: {
           _id: { $month: '$startDates' },
-          numTourStarts: { $sum: 1 },
+          numOfTours: { $sum: 1 },
           tours: { $push: '$name' },
         },
       },
@@ -156,7 +156,7 @@ const getMonthlyPlan = catchAsync(
       },
       {
         $sort: {
-          numTourStarts: -1,
+          numOfTours: -1,
         },
       },
       {

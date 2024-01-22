@@ -46,7 +46,6 @@ class APIFeatures {
   }
 
   limitFields() {
-    // Field limiting
     if (this.queryString.fields) {
       const fileds = (this.queryString.fields as string).split(',').join(' ');
       this.query = this.query.select(fileds);
