@@ -11,6 +11,7 @@ import hpp from 'hpp';
 import AppError from './utils/appError';
 import userRouter from './routes/userRoutes';
 import tourRouter from './routes/tourRoutes';
+import reviewRouter from './routes/reviewRoutes';
 import globalErrorHandler from './controllers/errorController';
 
 dotenv.config({ path: '.env' });
@@ -69,6 +70,7 @@ app.use((_req: Request, _res: Response, next: NextFunction) => {
 // Routes
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 // Error handler middleware for undefined routes
 app.all('*', (req: Request, _res: Response, next: NextFunction) => {
