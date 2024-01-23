@@ -27,6 +27,7 @@ export interface ITour {
   slug: string;
   startLocation: IStartLocation;
   locations: IStartLocation[];
+  guides: IUser[];
 }
 
 export interface TourModelType extends Model<ITour> {

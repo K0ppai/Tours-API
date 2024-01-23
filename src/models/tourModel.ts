@@ -2,6 +2,7 @@ import { NextFunction } from 'express';
 import { Model, model, Schema } from 'mongoose';
 import slugify from 'slugify';
 import { ITour, TourModelType } from 'types/index.js';
+import User from './userModel';
 
 const tourSchema = new Schema<ITour, Model<ITour>, {}>(
   {
@@ -103,6 +104,7 @@ const tourSchema = new Schema<ITour, Model<ITour>, {}>(
         day: Number,
       },
     ],
+    guides: Array,
   },
   {
     toJSON: { virtuals: true },
@@ -123,6 +125,13 @@ tourSchema.pre('save', function (next: NextFunction) {
   });
   next();
 });
+
+// Embedding 
+// tourSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 
 //  Middleware only works for the save()/create() events
 tourSchema.post('save', function (doc, next: NextFunction) {
