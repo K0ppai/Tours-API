@@ -51,7 +51,6 @@ const getTour = catchAsync(
 
 const postTour = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    console.log(req.body);
     const tour = await Tour.create(req.body);
 
     res.status(201).json({
