@@ -1,5 +1,8 @@
 import app from './app';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env' });
 
 process.on('uncaughtException', (err: Error) => {
   console.log(err.name, err.message);
@@ -8,9 +11,9 @@ process.on('uncaughtException', (err: Error) => {
 });
 
 const port = process.env.PORT || 3000;
-const DB: string = process.env.DATABASE.replace(
+const DB: string = process.env.DATABASE!.replace(
   '<PASSWORD>',
-  process.env.DATABASE_PASSWORD
+  process.env.DATABASE_PASSWORD!
 );
 mongoose.connect(DB).then(() => {
   console.log('DB connection successful');

@@ -1,7 +1,7 @@
 import { NextFunction } from 'express';
 import { Model, model, Schema } from 'mongoose';
 import slugify from 'slugify';
-import { ITour, TourModelType } from 'types';
+import { ITour, TourModelType } from 'types/index.js';
 
 const tourSchema = new Schema<ITour, Model<ITour>, {}>(
   {
@@ -80,6 +80,29 @@ const tourSchema = new Schema<ITour, Model<ITour>, {}>(
     },
     startDates: [Date],
     secretTour: { type: Boolean, default: false },
+    startLocation: {
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },

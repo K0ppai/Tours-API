@@ -1,12 +1,12 @@
 import Tour from '../models/tourModel';
 import mongoose from 'mongoose';
-import fs from 'node:fs';
+import fs from 'fs';
 import dotenv from 'dotenv';
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: '.env' });
 
-const DB: string = process.env.DATABASE.replace(
+const DB: string = process.env.DATABASE!.replace(
   '<PASSWORD>',
-  process.env.DATABASE_PASSWORD
+  process.env.DATABASE_PASSWORD!
 );
 
 mongoose.connect(DB).then(() => {
@@ -14,7 +14,7 @@ mongoose.connect(DB).then(() => {
 });
 
 const tours: any = JSON.parse(
-  fs.readFileSync(`${__dirname}/data/tours-simple.json`).toString()
+  fs.readFileSync(`${__dirname}/data/tours.json`).toString()
 );
 
 const deleteData = async () => {
@@ -37,9 +37,10 @@ const importData = async () => {
   }
 };
 
-if (process.argv[2] === 'import') {
+console.log(process.argv);
+
+if (process.argv[2] === '--import') {
   importData();
-} else if (process.argv[2] === 'delete') {
+} else if (process.argv[2] === '--delete') {
   deleteData();
 }
-

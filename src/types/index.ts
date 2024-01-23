@@ -1,6 +1,13 @@
 import { Request } from 'express';
 import { Model, Types } from 'mongoose';
 
+interface IStartLocation {
+  type: string;
+  coordinates: number[];
+  address: string;
+  description: string;
+  day: number;
+}
 export interface ITour {
   name: string;
   duration: number;
@@ -18,6 +25,8 @@ export interface ITour {
   description?: string;
   secretTour: Boolean;
   slug: string;
+  startLocation: IStartLocation;
+  locations: IStartLocation[];
 }
 
 export interface TourModelType extends Model<ITour> {
@@ -67,5 +76,5 @@ export interface IUserMethods {
 }
 
 export interface IProtectRequest extends Request {
-  user: IUser;
+  user: any;
 }
