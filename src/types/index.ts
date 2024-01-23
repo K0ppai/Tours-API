@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import { Model, Types } from 'mongoose';
 
+// Tour Types
 interface IStartLocation {
   type: string;
   coordinates: number[];
@@ -34,24 +35,7 @@ export interface TourModelType extends Model<ITour> {
   startTime: number;
 }
 
-export interface IReqQuery {
-  sort?: string;
-  fields?: string;
-  page?: string;
-  limit?: string;
-}
-
-export interface IErrorHandler extends Error {
-  statusCode?: number;
-  status?: string;
-  isOperational: boolean;
-  path?: string;
-  value?: string;
-  keyValue?: {
-    name: string;
-  };
-  errors: object;
-}
+// User Types
 export interface IUser {
   name: string;
   email: string;
@@ -76,6 +60,35 @@ export interface IUserMethods {
   createResetPasswordToken: () => string;
 }
 
+// Review Types
+export interface IReview {
+  review: string;
+  rating: number;
+  createdAt: Date;
+  tour: ITour;
+  user: IUser;
+}
+
+// Types related to requests
 export interface IProtectRequest extends Request {
-  user: any;
+  user: IUser;
+}
+
+export interface IReqQuery {
+  sort?: string;
+  fields?: string;
+  page?: string;
+  limit?: string;
+}
+
+export interface IErrorHandler extends Error {
+  statusCode?: number;
+  status?: string;
+  isOperational: boolean;
+  path?: string;
+  value?: string;
+  keyValue?: {
+    name: string;
+  };
+  errors: object;
 }
