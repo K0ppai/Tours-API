@@ -1,6 +1,5 @@
-import { Model, Schema, model } from 'mongoose';
+import { Model, Query, Schema, model } from 'mongoose';
 import { IReview } from 'types';
-import Tour from './tourModel';
 
 const reviewSchema = new Schema<IReview, Model<IReview>>(
   {
@@ -33,6 +32,15 @@ const reviewSchema = new Schema<IReview, Model<IReview>>(
     toObject: { virtuals: true },
   }
 );
+
+reviewSchema.pre(/^find/, function (this: Query<IReview[], IReview>, next) {
+  this.populate({
+    path: 'user',
+    select: 'name',
+  });
+
+  next();
+});
 
 const Review = model<IReview>('Review', reviewSchema);
 
