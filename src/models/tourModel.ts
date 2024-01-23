@@ -105,14 +105,14 @@ const tourSchema = new Schema<ITour, Model<ITour>, {}>(
     ],
     guides: [
       {
-        type: Schema.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
       },
     ],
   },
   {
     toJSON: { virtuals: true },
-    // toObject: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 

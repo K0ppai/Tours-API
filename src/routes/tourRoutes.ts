@@ -25,6 +25,6 @@ router
   .route('/:id')
   .get(getTour)
   .patch(patchTour)
-  .delete(protect, restrictTo('admin', 'lead-guide'), deleteTour);
+  .delete(protect, restrictTo('user', 'guide'), deleteTour);
 
 export default router;
