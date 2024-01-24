@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { Model } from 'mongoose';
+import { Model, Query } from 'mongoose';
 import { IReview, ITour, IUser } from 'types';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import APIFeatures from 'utils/apiFeatures';
+import APIFeatures from '../utils/apiFeatures';
 
 export const getAll = (Model: Model<ITour | IUser | IReview>) =>
   catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
@@ -22,6 +22,31 @@ export const getAll = (Model: Model<ITour | IUser | IReview>) =>
       status: 'success',
       results: docs.length,
       data: docs,
+    });
+  });
+
+export const getOne = (
+  Model: Model<ITour | IUser | IReview>,
+  populateOptions?: {
+    path: string;
+    select?: string;
+  }
+) =>
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    let query = Model.findById(id);
+
+    if (populateOptions) query = query.populate(populateOptions);
+
+    const doc = await query;
+
+    if (!doc) {
+      return next(new AppError('There is no document with this ID', 404));
+    }
+
+    res.json({
+      status: 'success',
+      data: doc,
     });
   });
 
