@@ -3,7 +3,13 @@ import { NextFunction, Request, Response } from 'express';
 import APIFeatures from '../utils/apiFeatures';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import { createOne, deleteOne, getAll, updateOne } from './factoryHandler';
+import {
+  createOne,
+  deleteOne,
+  getAll,
+  getOne,
+  updateOne,
+} from './factoryHandler';
 
 // middleware for top-5-cheap
 export const aliasTopTours = (
@@ -18,26 +24,8 @@ export const aliasTopTours = (
   next();
 };
 
-
-export const getTour = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-
-    const tour = await Tour.findById(id).populate('reviews');
-
-    if (!tour) {
-      return next(new AppError('There is no tour with this ID', 404));
-    }
-
-    res.json({
-      status: 'success',
-      data: { tour },
-    });
-  }
-  );
-  
-  export const getTourStats = catchAsync(
-    async (_req: Request, res: Response, _next: NextFunction) => {
+export const getTourStats = catchAsync(
+  async (_req: Request, res: Response, _next: NextFunction) => {
     const stats = await Tour.aggregate([
       {
         $match: { ratingsAverage: { $gte: 4.5 } },
@@ -70,7 +58,7 @@ export const getTour = catchAsync(
 export const getMonthlyPlan = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { year } = req.params;
-    
+
     const tours = await Tour.aggregate([
       {
         $unwind: '$startDates',
@@ -115,10 +103,10 @@ export const getMonthlyPlan = catchAsync(
       data: { tours },
     });
   }
-  );
-  
-  export const getAllTours = getAll(Tour);
-  export const postTour = createOne(Tour);
-  export const patchTour = updateOne(Tour);
-  export const deleteTour = deleteOne(Tour);
-  
+);
+
+export const getAllTours = getAll(Tour);
+export const getTour = getOne(Tour, { path: 'reviews' });
+export const postTour = createOne(Tour);
+export const patchTour = updateOne(Tour);
+export const deleteTour = deleteOne(Tour);

@@ -2,6 +2,7 @@ import { protect, restrictTo } from '../controllers/authController';
 import {
   deleteReview,
   getAllReviews,
+  getReview,
   postReview,
   setUserTourIds,
   updateReview,
@@ -15,6 +16,6 @@ router
   .get(getAllReviews)
   .post(protect, restrictTo('user'), setUserTourIds, postReview);
 
-router.route('/:id').patch(updateReview).delete(deleteReview);
+router.route('/:id').get(getReview).patch(updateReview).delete(deleteReview);
 
 export default router;

@@ -1,7 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import Review from '../models/reviewModel';
 import { IProtectRequest } from 'types';
-import { createOne, deleteOne, getAll, updateOne } from './factoryHandler';
+import {
+  createOne,
+  deleteOne,
+  getAll,
+  getOne,
+  updateOne,
+} from './factoryHandler';
 
 export const setUserTourIds = async (
   req: IProtectRequest,
@@ -15,6 +21,7 @@ export const setUserTourIds = async (
 };
 
 export const getAllReviews = getAll(Review);
+export const getReview = getOne(Review);
 export const postReview = createOne(Review);
 export const updateReview = updateOne(Review);
 export const deleteReview = deleteOne(Review);

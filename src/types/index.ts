@@ -47,7 +47,7 @@ export interface IUser {
   passwordResetExpiredAt: Date;
   passwordResetToken: string;
   _id: Types.ObjectId;
-  id: Types.ObjectId;
+  id: string;
   active: boolean;
 }
 
