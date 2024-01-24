@@ -3,11 +3,10 @@ import { NextFunction, Request, Response } from 'express';
 import APIFeatures from '../utils/apiFeatures';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import { deleteOne } from './factoryHandler';
-import User from 'models/userModel';
+import { deleteOne, updateOne } from './factoryHandler';
 
 // middleware for top-5-cheap
-const aliasTopTours = (req: Request, _res: Response, next: NextFunction) => {
+export const aliasTopTours = (req: Request, _res: Response, next: NextFunction) => {
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   req.query.limit = '5';
@@ -15,7 +14,7 @@ const aliasTopTours = (req: Request, _res: Response, next: NextFunction) => {
   next();
 };
 
-const getAllTours = catchAsync(
+export const getAllTours = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const features = new APIFeatures(Tour.find(), req.query)
       .filter()
@@ -34,7 +33,7 @@ const getAllTours = catchAsync(
   }
 );
 
-const getTour = catchAsync(
+export const getTour = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
@@ -51,7 +50,7 @@ const getTour = catchAsync(
   }
 );
 
-const postTour = catchAsync(
+export const postTour = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const tour = await Tour.create(req.body);
 
@@ -62,26 +61,10 @@ const postTour = catchAsync(
   }
 );
 
-const patchTour = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
-    const { id } = req.params;
+export const patchTour = updateOne(Tour);
+export const deleteTour = deleteOne(Tour);
 
-    const tour = await Tour.findByIdAndUpdate(id, req.body, {
-      new: true,
-      // run validators(ie. maxLength) again
-      runValidators: true,
-    });
-
-    res.status(200).json({
-      status: 'success',
-      data: { tour },
-    });
-  }
-);
-
-const deleteTour = deleteOne(Tour);
-
-const getTourStats = catchAsync(
+export const getTourStats = catchAsync(
   async (_req: Request, res: Response, _next: NextFunction) => {
     const stats = await Tour.aggregate([
       {
@@ -112,7 +95,7 @@ const getTourStats = catchAsync(
   }
 );
 
-const getMonthlyPlan = catchAsync(
+export const getMonthlyPlan = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { year } = req.params;
 
@@ -161,14 +144,3 @@ const getMonthlyPlan = catchAsync(
     });
   }
 );
-
-export {
-  getAllTours,
-  postTour,
-  patchTour,
-  deleteTour,
-  getTour,
-  aliasTopTours,
-  getTourStats,
-  getMonthlyPlan,
-};

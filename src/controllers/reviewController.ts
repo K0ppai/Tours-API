@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import Review from '../models/reviewModel';
 import catchAsync from '../utils/catchAsync';
 import { IProtectRequest } from 'types';
-import { deleteOne } from './factoryHandler';
+import { deleteOne, updateOne } from './factoryHandler';
 
 export const getAllReviews = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -33,4 +33,5 @@ export const postReview = catchAsync(
   }
 );
 
+export const updateReview = updateOne(Review);
 export const deleteReview = deleteOne(Review);
