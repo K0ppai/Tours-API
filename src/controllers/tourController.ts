@@ -3,6 +3,8 @@ import { NextFunction, Request, Response } from 'express';
 import APIFeatures from '../utils/apiFeatures';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
+import { deleteOne } from './factoryHandler';
+import User from 'models/userModel';
 
 // middleware for top-5-cheap
 const aliasTopTours = (req: Request, _res: Response, next: NextFunction) => {
@@ -77,18 +79,7 @@ const patchTour = catchAsync(
   }
 );
 
-const deleteTour = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
-    const { id } = req.params;
-
-    await Tour.findByIdAndDelete(id);
-
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  }
-);
+const deleteTour = deleteOne(Tour);
 
 const getTourStats = catchAsync(
   async (_req: Request, res: Response, _next: NextFunction) => {

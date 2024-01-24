@@ -3,6 +3,7 @@ import User from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
 import bcrypt from 'bcrypt';
 import { IProtectRequest } from 'types';
+import { deleteOne } from './factoryHandler';
 
 // middlewares
 export const checkId = (
@@ -101,7 +102,4 @@ export const patchUser = catchAsync(async (req: Request, res: Response) => {
   res.json({ message: `Patch user${id}`, user });
 });
 
-export const deleteUser = (req: Request, res: Response) => {
-  const { id } = req.params;
-  res.json({ message: `Delete user${id}` });
-};
+export const deleteUser = deleteOne(User);
