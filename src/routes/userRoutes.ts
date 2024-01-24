@@ -29,24 +29,26 @@ router.post('/signup', signup);
 
 router.post('/login', login);
 
-router.get('/me', protect, setUserId, getUser);
-
 router.post('/forgotPassword', forgotPassword);
 
 router.patch('/resetPassword/:token', resetPassword);
 
-router.patch('/updatePassword', protect, updatePassword);
+// Middleware to protect all routes after this
+router.use(protect);
 
-router.patch('/updateMe', protect, updateMe);
+router.get('/me', setUserId, getUser);
 
-router.delete('/deleteMe', protect, deleteMe);
+router.patch('/updatePassword', updatePassword);
+
+router.patch('/updateMe', updateMe);
+
+router.delete('/deleteMe', deleteMe);
+
+// Middleware for authorization
+router.use(restrictTo('admin'));
 
 router.route('/').get(getAllUsers);
 
-router
-  .route('/:id')
-  .get(getUser)
-  .patch(protect, patchUser)
-  .delete(protect, restrictTo('admin'), deleteUser);
+router.route('/:id').get(getUser).patch(patchUser).delete(deleteUser);
 
 export default router;

@@ -11,11 +11,17 @@ import express from 'express';
 
 const router = express.Router({ mergeParams: true });
 
+router.use(protect);
+
 router
   .route('/')
   .get(getAllReviews)
-  .post(protect, restrictTo('user'), setUserTourIds, postReview);
+  .post(restrictTo('user'), setUserTourIds, postReview);
 
-router.route('/:id').get(getReview).patch(updateReview).delete(deleteReview);
+router
+  .route('/:id')
+  .get(getReview)
+  .patch(restrictTo('user', 'admin'), updateReview)
+  .delete(restrictTo('user', 'admin'), deleteReview);
 
 export default router;
