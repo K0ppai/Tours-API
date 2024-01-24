@@ -2,10 +2,13 @@ import { NextFunction, Request, Response } from 'express';
 import Review from '../models/reviewModel';
 import catchAsync from '../utils/catchAsync';
 import { IProtectRequest } from 'types';
+import { deleteOne } from './factoryHandler';
 
 export const getAllReviews = catchAsync(
-  async (_req: Request, res: Response, _next: NextFunction) => {
-    const reviews = await Review.find();
+  async (req: Request, res: Response, _next: NextFunction) => {
+    let filter = {};
+    if (req.params.tourId) filter = { tour: req.params.tourId };
+    const reviews = await Review.find(filter);
 
     res.status(200).json({
       status: 'success',
@@ -29,3 +32,5 @@ export const postReview = catchAsync(
     });
   }
 );
+
+export const deleteReview = deleteOne(Review);
