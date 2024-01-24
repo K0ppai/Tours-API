@@ -7,7 +7,6 @@ import {
   getAllUsers,
   getUser,
   patchUser,
-  postUser,
   updateMe,
 } from '../controllers/userController';
 import {
@@ -38,7 +37,7 @@ router.delete('/deleteMe', protect, deleteMe);
 
 router.post('/login', login);
 
-router.route('/').get(getAllUsers).post(checkBody, postUser);
+router.route('/').get(getAllUsers)
 
 router.route('/:id').get(getUser).patch(protect, patchUser).delete(deleteUser);
 

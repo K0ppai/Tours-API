@@ -80,10 +80,6 @@ export const getUser = (req: Request, res: Response) => {
   res.json({ message: `Get user${id}` });
 };
 
-export const postUser = (req: Request, res: Response) => {
-  res.json({ message: 'Post User' });
-};
-
 // Don't update password with this it won't bcrypt because it's not an save/create event
 export const patchUser = updateOne(User);
 export const deleteUser = deleteOne(User);

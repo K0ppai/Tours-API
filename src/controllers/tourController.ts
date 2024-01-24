@@ -3,10 +3,14 @@ import { NextFunction, Request, Response } from 'express';
 import APIFeatures from '../utils/apiFeatures';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import { deleteOne, updateOne } from './factoryHandler';
+import { createOne, deleteOne, updateOne } from './factoryHandler';
 
 // middleware for top-5-cheap
-export const aliasTopTours = (req: Request, _res: Response, next: NextFunction) => {
+export const aliasTopTours = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   req.query.limit = '5';
@@ -49,20 +53,6 @@ export const getTour = catchAsync(
     });
   }
 );
-
-export const postTour = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
-    const tour = await Tour.create(req.body);
-
-    res.status(201).json({
-      status: 'success',
-      data: { tour },
-    });
-  }
-);
-
-export const patchTour = updateOne(Tour);
-export const deleteTour = deleteOne(Tour);
 
 export const getTourStats = catchAsync(
   async (_req: Request, res: Response, _next: NextFunction) => {
@@ -144,3 +134,7 @@ export const getMonthlyPlan = catchAsync(
     });
   }
 );
+
+export const postTour = createOne(Tour);
+export const patchTour = updateOne(Tour);
+export const deleteTour = deleteOne(Tour);
