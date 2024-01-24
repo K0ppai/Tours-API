@@ -2,6 +2,28 @@ import { NextFunction, Request, Response } from 'express';
 import { Model } from 'mongoose';
 import { IReview, ITour, IUser } from 'types';
 import catchAsync from '../utils/catchAsync';
+import AppError from '../utils/appError';
+import APIFeatures from 'utils/apiFeatures';
+
+export const getAll = (Model: Model<ITour | IUser | IReview>) =>
+  catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+    // filter for the nested tour review route
+    let filter = {};
+    if (req.params.tourId) filter = { tour: req.params.tourId };
+
+    const features = new APIFeatures(Model.find(filter), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const docs = await features.query;
+
+    res.status(200).json({
+      status: 'success',
+      results: docs.length,
+      data: docs,
+    });
+  });
 
 export const deleteOne = (Model: Model<ITour | IUser | IReview>) =>
   catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
@@ -16,27 +38,31 @@ export const deleteOne = (Model: Model<ITour | IUser | IReview>) =>
   });
 
 export const updateOne = (Model: Model<ITour | IUser | IReview>) =>
-  catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    const tour = await Model.findByIdAndUpdate(id, req.body, {
+    const doc = await Model.findByIdAndUpdate(id, req.body, {
       new: true,
       // run validators(ie. maxLength) again
       runValidators: true,
     });
 
+    if (!doc) {
+      return next(new AppError('There is no document with this ID.', 404));
+    }
+
     res.status(200).json({
       status: 'success',
-      data: { tour },
+      data: doc,
     });
   });
 
 export const createOne = (Model: Model<ITour | IUser | IReview>) =>
   catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
-    const tour = await Model.create(req.body);
+    const doc = await Model.create(req.body);
 
     res.status(201).json({
       status: 'success',
-      data: { tour },
+      data: doc,
     });
   });

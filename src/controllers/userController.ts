@@ -3,7 +3,7 @@ import User from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
 import bcrypt from 'bcrypt';
 import { IProtectRequest } from 'types';
-import { deleteOne, updateOne } from './factoryHandler';
+import { deleteOne, getAll, updateOne } from './factoryHandler';
 
 // middlewares
 export const checkId = (
@@ -28,20 +28,6 @@ export const checkBody = (req: Request, res: Response, next: NextFunction) => {
   }
   next();
 };
-
-export const getAllUsers = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
-    const users = await User.find();
-
-    res.status(200).json({
-      status: 'success',
-      results: users.length,
-      data: {
-        users,
-      },
-    });
-  }
-);
 
 export const updateMe = catchAsync(
   async (req: IProtectRequest, res: Response, _next: NextFunction) => {
@@ -80,6 +66,7 @@ export const getUser = (req: Request, res: Response) => {
   res.json({ message: `Get user${id}` });
 };
 
+export const getAllUsers = getAll(User);
 // Don't update password with this it won't bcrypt because it's not an save/create event
 export const patchUser = updateOne(User);
 export const deleteUser = deleteOne(User);

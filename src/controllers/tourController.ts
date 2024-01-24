@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import APIFeatures from '../utils/apiFeatures';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../utils/appError';
-import { createOne, deleteOne, updateOne } from './factoryHandler';
+import { createOne, deleteOne, getAll, updateOne } from './factoryHandler';
 
 // middleware for top-5-cheap
 export const aliasTopTours = (
@@ -18,24 +18,6 @@ export const aliasTopTours = (
   next();
 };
 
-export const getAllTours = catchAsync(
-  async (req: Request, res: Response, _next: NextFunction) => {
-    const features = new APIFeatures(Tour.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
-    const tours = await features.query;
-
-    res.status(200).json({
-      status: 'success',
-      results: tours.length,
-      data: {
-        tours,
-      },
-    });
-  }
-);
 
 export const getTour = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -52,10 +34,10 @@ export const getTour = catchAsync(
       data: { tour },
     });
   }
-);
-
-export const getTourStats = catchAsync(
-  async (_req: Request, res: Response, _next: NextFunction) => {
+  );
+  
+  export const getTourStats = catchAsync(
+    async (_req: Request, res: Response, _next: NextFunction) => {
     const stats = await Tour.aggregate([
       {
         $match: { ratingsAverage: { $gte: 4.5 } },
@@ -88,7 +70,7 @@ export const getTourStats = catchAsync(
 export const getMonthlyPlan = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const { year } = req.params;
-
+    
     const tours = await Tour.aggregate([
       {
         $unwind: '$startDates',
@@ -133,8 +115,10 @@ export const getMonthlyPlan = catchAsync(
       data: { tours },
     });
   }
-);
-
-export const postTour = createOne(Tour);
-export const patchTour = updateOne(Tour);
-export const deleteTour = deleteOne(Tour);
+  );
+  
+  export const getAllTours = getAll(Tour);
+  export const postTour = createOne(Tour);
+  export const patchTour = updateOne(Tour);
+  export const deleteTour = deleteOne(Tour);
+  
