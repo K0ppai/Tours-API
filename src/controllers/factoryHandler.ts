@@ -30,3 +30,13 @@ export const updateOne = (Model: Model<ITour | IUser | IReview>) =>
       data: { tour },
     });
   });
+
+export const createOne = (Model: Model<ITour | IUser | IReview>) =>
+  catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+    const tour = await Model.create(req.body);
+
+    res.status(201).json({
+      status: 'success',
+      data: { tour },
+    });
+  });
