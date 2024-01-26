@@ -181,17 +181,17 @@ tourSchema.post(/^find/, function (this: ITourQuery, _doc, next: NextFunction) {
 });
 
 // Aggregation Middleware
-tourSchema.pre('aggregate', function (next: NextFunction) {
-  this.pipeline().unshift({
-    $match: {
-      secretTour: {
-        $ne: true,
-      },
-    },
-  });
+// tourSchema.pre('aggregate', function (next: NextFunction) {
+//   this.pipeline().unshift({
+//     $match: {
+//       secretTour: {
+//         $ne: true,
+//       },
+//     },
+//   });
 
-  next();
-});
+//   next();
+// });
 
 const Tour = model<ITour>('Tour', tourSchema);
 

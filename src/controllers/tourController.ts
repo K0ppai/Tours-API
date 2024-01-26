@@ -128,6 +128,41 @@ export const getToursWithIn = catchAsync(
   }
 );
 
+export const getDistances = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(',');
+    const multiplier = unit === 'mi' ? 0.000621371192 : 0.001;
+
+    const tours = await Tour.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: 'Point',
+            coordinates: [Number(lng), Number(lat)],
+          },
+          distanceField: 'distance',
+          // distance is calculated in meter, to convert m to mi/km
+          distanceMultiplier: multiplier,
+        },
+      },
+      {
+        $project: {
+          distance: 1,
+          name: 1,
+          id: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: tours,
+    });
+  }
+);
+
 export const getAllTours = getAll(Tour);
 export const getTour = getOne(Tour, { path: 'reviews' });
 export const postTour = createOne(Tour);
