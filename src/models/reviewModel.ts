@@ -1,5 +1,6 @@
-import { Model, Query, Schema, model } from 'mongoose';
-import { IReview } from 'types';
+import { Model, Schema, model } from 'mongoose';
+import { IReview, IReviewQuery } from 'types';
+import Tour from './tourModel';
 
 const reviewSchema = new Schema<IReview, Model<IReview>>(
   {
@@ -33,13 +34,64 @@ const reviewSchema = new Schema<IReview, Model<IReview>>(
   }
 );
 
-reviewSchema.pre(/^find/, function (this: Query<IReview[], IReview>, next) {
+reviewSchema.statics.calcAverageRating = async function (
+  this: Model<IReview>,
+  tourId: Schema.Types.ObjectId
+) {
+  // In static methods, this point to the model.
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: '$tour',
+        nRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ]);
+
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsAverage: stats[0].avgRating,
+      ratingsQuantity: stats[0].nRating,
+    });
+  } else {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsAverage: 4.5,
+      ratingsQuantity: 0,
+    });
+  }
+};
+
+// Query Middlewares
+reviewSchema.pre(/^find/, function (this: IReviewQuery, next) {
   this.populate({
     path: 'user',
     select: 'name',
   });
 
   next();
+});
+
+// Middleware to pass the current review to the post middleware to get the tourId
+reviewSchema.pre(/^findOneAnd/, async function (this: IReviewQuery, next) {
+  // Pass the current modified review
+  this.review = await this.model.findOne(this.getQuery());
+  next();
+});
+
+// After query this is an Document
+reviewSchema.post(/^findOneAnd/, function (this: IReviewQuery) {
+  // this.review = doc
+  this.review.constructor.calcAverageRating(this.review.tour);
+});
+
+//  Middleware before the save()/create() event
+reviewSchema.post('save', function (this: IReview) {
+  // this = document, this.constructor = Model
+  this.constructor.calcAverageRating(this.tour);
 });
 
 const Review = model<IReview>('Review', reviewSchema);
