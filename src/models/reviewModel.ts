@@ -65,6 +65,9 @@ reviewSchema.statics.calcAverageRating = async function (
   }
 };
 
+// each combination of tour and user will be unique. ie: a user can only give one review to a tour.
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 // Query Middlewares
 reviewSchema.pre(/^find/, function (this: IReviewQuery, next) {
   this.populate({

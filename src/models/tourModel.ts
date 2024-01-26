@@ -119,6 +119,7 @@ const tourSchema = new Schema<ITour, Model<ITour>, {}>(
 // Improve read performance with indexes
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 // Virtuals will only be available when set to true in Model option
 tourSchema.virtual('durationInWeek').get(function () {

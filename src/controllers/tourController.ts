@@ -105,6 +105,29 @@ export const getMonthlyPlan = catchAsync(
   }
 );
 
+export const getToursWithIn = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { distance, latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(',');
+    const radius =
+      unit === 'mi' ? parseInt(distance) / 3963.2 : parseInt(distance) / 6378.1;
+
+    const tours = await Tour.find({
+      startLocation: {
+        $geoWithin: {
+          $centerSphere: [[lng, lat], radius],
+        },
+      },
+    });
+
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: tours,
+    });
+  }
+);
+
 export const getAllTours = getAll(Tour);
 export const getTour = getOne(Tour, { path: 'reviews' });
 export const postTour = createOne(Tour);
