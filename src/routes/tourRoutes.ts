@@ -8,6 +8,7 @@ import {
   aliasTopTours,
   getTourStats,
   getMonthlyPlan,
+  getToursWithIn,
 } from '../controllers/tourController';
 import { protect, restrictTo } from '../controllers/authController';
 import reviewRouter from '../routes/reviewRoutes';
@@ -23,6 +24,10 @@ router
 router.route('/tour-stats').get(getTourStats);
 
 router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
+
+router
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(getToursWithIn);
 
 router
   .route('/')
