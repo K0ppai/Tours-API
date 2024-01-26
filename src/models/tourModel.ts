@@ -1,7 +1,7 @@
 import { NextFunction } from 'express';
 import { Model, model, Query, Schema } from 'mongoose';
 import slugify from 'slugify';
-import { ITour, TourModelType } from 'types/index.js';
+import { ITour, ITourQuery } from 'types/index.js';
 
 const tourSchema = new Schema<ITour, Model<ITour>, {}>(
   {
@@ -149,14 +149,14 @@ tourSchema.pre('save', function (next: NextFunction) {
 // });
 
 //  Middleware only works for the save()/create() events
-tourSchema.post('save', function (doc, next: NextFunction) {
+tourSchema.post('save', function (doc: ITour, next: NextFunction) {
   console.log('Document Saved');
   console.log(doc);
   next();
 });
 
 // QUERY MIDDLEWARE
-tourSchema.pre(/^find/, function (this: TourModelType, next: NextFunction) {
+tourSchema.pre(/^find/, function (this: ITourQuery, next: NextFunction) {
   this.find({
     secretTour: {
       $ne: true,
@@ -166,7 +166,7 @@ tourSchema.pre(/^find/, function (this: TourModelType, next: NextFunction) {
   next();
 });
 
-tourSchema.pre(/^find/, function (this: Query<ITour[], ITour>, next) {
+tourSchema.pre(/^find/, function (this: ITourQuery, next) {
   this.populate({
     path: 'guides',
     select: '-passwordChangedAt -__v',
@@ -174,13 +174,10 @@ tourSchema.pre(/^find/, function (this: Query<ITour[], ITour>, next) {
   next();
 });
 
-tourSchema.post(
-  /^find/,
-  function (this: TourModelType, _doc, next: NextFunction): void {
-    console.log(`Query took ${Date.now() - this.startTime}`);
-    next();
-  }
-);
+tourSchema.post(/^find/, function (this: ITourQuery, _doc, next: NextFunction) {
+  console.log(`Query took ${Date.now() - this.startTime}`);
+  next();
+});
 
 // Aggregation Middleware
 tourSchema.pre('aggregate', function (next: NextFunction) {
