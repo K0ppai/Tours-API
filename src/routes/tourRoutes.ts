@@ -9,6 +9,7 @@ import {
   getTourStats,
   getMonthlyPlan,
   getToursWithIn,
+  getDistances,
 } from '../controllers/tourController';
 import { protect, restrictTo } from '../controllers/authController';
 import reviewRouter from '../routes/reviewRoutes';
@@ -28,6 +29,8 @@ router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 router
   .route('/tours-within/:distance/center/:latlng/unit/:unit')
   .get(getToursWithIn);
+
+router.route('/distances/:latlng/unit/:unit').get(getDistances);
 
 router
   .route('/')
