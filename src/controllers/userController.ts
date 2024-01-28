@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import User from '../models/userModel';
 import catchAsync from '../utils/catchAsync';
-import bcrypt from 'bcrypt';
 import { IProtectRequest } from 'types';
 import { deleteOne, getAll, getOne, updateOne } from './factoryHandler';
+import multer, { FileFilterCallback } from 'multer';
+import AppError from '../utils/appError';
 
 // middlewares
 export const checkId = (
@@ -28,6 +29,33 @@ export const checkBody = (req: Request, res: Response, next: NextFunction) => {
   }
   next();
 };
+
+// Multer file upload configurations
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, 'public/img/users/');
+  },
+  filename: (req: IProtectRequest, file, cb) => {
+    const ext = file.mimetype.split('/')[1];
+    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+  },
+});
+
+const fileFilter = (
+  _req: Request,
+  file: Express.Multer.File,
+  cb: FileFilterCallback
+) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Please upload only images.', 400));
+  }
+};
+
+const upload = multer({ storage, fileFilter });
+
+export const uploadUserPhoto = upload.single('photo');
 
 export const updateMe = catchAsync(
   async (req: IProtectRequest, res: Response, _next: NextFunction) => {
