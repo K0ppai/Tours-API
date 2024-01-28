@@ -60,26 +60,24 @@ const upload = multer({ storage, fileFilter });
 
 export const uploadUserPhoto = upload.single('photo');
 
-export const resizeUserPhoto = (
-  req: IProtectRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  // If there's no image upload, simply update with req.body
-  if (!req.file) return next();
+export const resizeUserPhoto = catchAsync(
+  async (req: IProtectRequest, res: Response, next: NextFunction) => {
+    // If there's no image upload, simply update with req.body
+    if (!req.file) return next();
 
-  // If stored in Memory no filename yet, so pass along the filename
-  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+    // If stored in Memory no filename yet, so pass along the filename
+    req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
-  // can access to buffer because of multer.memoryStorage()
-  sharp(req.file.buffer)
-    .resize(500, 500)
-    .toFormat('jpeg')
-    .jpeg({ quality: 90 })
-    .toFile(`public/img/users/${req.file.filename}`); //to save as a file in disk
+    // can access to buffer because of multer.memoryStorage()
+    await sharp(req.file.buffer)
+      .resize(500, 500)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/img/users/${req.file.filename}`); //to save as a file in disk
 
-  next();
-};
+    next();
+  }
+);
 
 export const updateMe = catchAsync(
   async (req: IProtectRequest, res: Response, _next: NextFunction) => {
