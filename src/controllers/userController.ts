@@ -5,6 +5,7 @@ import { IProtectRequest } from 'types';
 import { deleteOne, getAll, getOne, updateOne } from './factoryHandler';
 import multer, { FileFilterCallback } from 'multer';
 import AppError from '../utils/appError';
+import sharp from 'sharp';
 
 // middlewares
 export const checkId = (
@@ -31,15 +32,17 @@ export const checkBody = (req: Request, res: Response, next: NextFunction) => {
 };
 
 // Multer file upload configurations
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, 'public/img/users/');
-  },
-  filename: (req: IProtectRequest, file, cb) => {
-    const ext = file.mimetype.split('/')[1];
-    cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
-  },
-});
+// const storage = multer.diskStorage({
+//   destination: (_req, _file, cb) => {
+//     cb(null, 'public/img/users/');
+//   },
+//   filename: (req: IProtectRequest, file, cb) => {
+//     const ext = file.mimetype.split('/')[1];
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   },
+// });
+
+const storage = multer.memoryStorage();
 
 const fileFilter = (
   _req: Request,
@@ -57,11 +60,33 @@ const upload = multer({ storage, fileFilter });
 
 export const uploadUserPhoto = upload.single('photo');
 
+export const resizeUserPhoto = (
+  req: IProtectRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  // If there's no image upload, simply update with req.body
+  if (!req.file) return next();
+
+  // If stored in Memory no filename yet, so pass along the filename
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+  // can access to buffer because of multer.memoryStorage()
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`); //to save as a file in disk
+
+  next();
+};
+
 export const updateMe = catchAsync(
   async (req: IProtectRequest, res: Response, _next: NextFunction) => {
     const updateFields = {
       name: req.body.name,
       email: req.body.email,
+      photo: req.file.filename,
     };
 
     const user = await User.findByIdAndUpdate(req.user.id, updateFields, {

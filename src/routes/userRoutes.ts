@@ -7,6 +7,7 @@ import {
   getAllUsers,
   getUser,
   patchUser,
+  resizeUserPhoto,
   setUserId,
   updateMe,
   uploadUserPhoto,
@@ -42,7 +43,7 @@ router.get('/me', setUserId, getUser);
 
 router.patch('/updatePassword', updatePassword);
 
-router.patch('/updateMe', uploadUserPhoto, updateMe);
+router.patch('/updateMe', uploadUserPhoto, resizeUserPhoto, updateMe);
 
 router.delete('/deleteMe', deleteMe);
 
