@@ -100,3 +100,14 @@ export interface IErrorHandler extends Error {
   };
   errors: object;
 }
+
+export interface IFileRequest extends Request {
+  body: {
+    imageCover: string;
+    images: string[];
+  };
+  files: {
+    imageCover: Express.Multer.File[];
+    images: Express.Multer.File[];
+  };
+}
