@@ -4,7 +4,7 @@ import catchAsync from '../utils/catchAsync';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import AppError from '../utils/appError';
 import { Types } from 'mongoose';
-import { sendEmail } from '../utils/email';
+import { Email, sendEmail } from '../utils/email';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import { IProtectRequest, IUser } from 'types';
@@ -51,6 +51,10 @@ const signup = catchAsync(
       passwordChangedAt: req.body.passwordChangedAt,
       role: req.body.role,
     });
+
+    const url = `${req.protocol}://${req.get('host')}/me`;
+
+    await new Email(user, url).sendWelcome();
 
     createSendToken(user, res, 201);
   }

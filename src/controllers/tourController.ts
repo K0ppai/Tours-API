@@ -188,8 +188,7 @@ export const uploadTourImages = upload.fields([
 ]);
 
 export const resizeTourImages = catchAsync(
-  async (req: IFileRequest, res: Response, next: NextFunction) => {
-    console.log(req.files);
+  async (req: IFileRequest, _res: Response, next: NextFunction) => {
     if (!req.files.imageCover || !req.files.images) return next();
 
     // 1) imageCover
@@ -202,8 +201,10 @@ export const resizeTourImages = catchAsync(
       .jpeg({ quality: 90 })
       .toFile(`public/img/users/${req.body.imageCover}`);
 
+    // 2) images 
     req.body.images = [];
-
+    
+    // Use map to return array for Promise.all to await all promises from sharp
     await Promise.all(
       req.files.images.map(async (file, i) => {
         const fileName = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
