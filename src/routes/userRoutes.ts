@@ -9,6 +9,7 @@ import {
   patchUser,
   setUserId,
   updateMe,
+  uploadUserPhoto,
 } from '../controllers/userController';
 import {
   forgotPassword,
@@ -19,6 +20,7 @@ import {
   signup,
   updatePassword,
 } from '../controllers/authController';
+import multer from 'multer';
 
 const router = express.Router();
 
@@ -40,7 +42,7 @@ router.get('/me', setUserId, getUser);
 
 router.patch('/updatePassword', updatePassword);
 
-router.patch('/updateMe', updateMe);
+router.patch('/updateMe', uploadUserPhoto, updateMe);
 
 router.delete('/deleteMe', deleteMe);
 
