@@ -22,7 +22,7 @@ router.use('/:tourId/reviews', reviewRouter);
 
 router
   .route('/monthly-plan/:year')
-  .get(restrictTo('admin', 'lead-guide', 'guide'), getMonthlyPlan);
+  .get(protect, restrictTo('admin', 'lead-guide', 'guide'), getMonthlyPlan);
 
 router.route('/tour-stats').get(getTourStats);
 
