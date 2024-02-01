@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
+import compression from 'compression';
 
 import AppError from './utils/appError';
 import userRouter from './routes/userRoutes';
@@ -60,6 +61,9 @@ app.use(
     ],
   })
 );
+
+// Compress HTTP responses to significantly reduce the amount of data transferred over the network, leading to faster page loads.
+app.use(compression());
 
 // Test middleware
 app.use((_req: Request, _res: Response, next: NextFunction) => {
