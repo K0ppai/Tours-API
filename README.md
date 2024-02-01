@@ -3,7 +3,7 @@
 <div align="center">
 
   <h1><b>Tours API</b></h1>
-  <img src="./assets/images/dinespotter.png" />
+  <img src="./src/assets/images/Api Documentation.png" />
 
 </div>
 <!-- TABLE OF CONTENTS -->
@@ -61,7 +61,7 @@
 
 ## API Documentation <a name="api-documentation"></a>
 
-- [Live Documentation](https://documenter.getpostman.com/view/28835577/2s9YysE2U8)
+- <a href="https://documenter.getpostman.com/view/28835577/2s9YysE2U8" target="_blank">Live Documentation</a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
