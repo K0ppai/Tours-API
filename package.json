@@ -27,7 +27,8 @@
   "scripts": {
     "dev": "npx nodemon",
     "start:prod": "set NODE_ENV=production&& nodemon",
-    "build": "rimraf ./build && tsc"
+    "build": "rimraf ./build && tsc",
+    "start": "node ./build/server.js"
   },
   "author": "",
   "license": "ISC",
